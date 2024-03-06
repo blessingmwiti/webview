@@ -1,23 +1,66 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 
 void main() {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  _MyAppState createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  final Connectivity _connectivity = Connectivity();
+  late StreamSubscription<ConnectivityResult> _connectivitySubscription;
+  bool _isOnline = true; // Initial assumption
+
+  @override
+  void initState() {
+    super.initState();
+    _initConnectivity();
+    _connectivitySubscription = _connectivity.onConnectivityChanged.listen(_updateConnectionStatus);
+  }
+
+  @override
+  void dispose() {
+    _connectivitySubscription.cancel();
+    super.dispose();
+  }
+
+  Future<void> _initConnectivity() async {
+    ConnectivityResult result;
+    try {
+      result = await _connectivity.checkConnectivity();
+      _updateConnectionStatus(result);
+    } catch (e) {
+      if (kDebugMode) {
+        print("Couldn't check connectivity status: $e");
+      }
+      return;
+    }
+  }
+
+  void _updateConnectionStatus(ConnectivityResult result) {
+    setState(() {
+      _isOnline = result != ConnectivityResult.none;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter WebView Demo',
+      title: 'Flutter WebView',
       theme: ThemeData(
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: const SplashScreen(),
+      home: _isOnline ? const SplashScreen() : const NoConnectionScreen(),
     );
   }
 }
@@ -35,7 +78,7 @@ class _SplashScreenState extends State<SplashScreen> {
     super.initState();
     Timer(
       const Duration(seconds: 3),
-          () => Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => const WebViewScreen(url: 'https://your-url.com'))), // Replace with your actual URL
+          () => Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => const WebViewScreen(url: 'https://sawititech.co.ke'))), // Replace with your actual URL
     );
   }
 
@@ -105,6 +148,27 @@ class WebViewScreenState extends State<WebViewScreen> {
           ),
           if (_isLoading) const Center(child: CircularProgressIndicator()),
         ],
+      ),
+    );
+  }
+}
+
+
+class NoConnectionScreen extends StatelessWidget {
+  const NoConnectionScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Image.asset('assets/images/no_connection.png'), // Make sure to add an image in your assets
+            const SizedBox(height: 20),
+            const Text("Kindly check your internet connection!"),
+          ],
+        ),
       ),
     );
   }
