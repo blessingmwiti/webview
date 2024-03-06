@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 void main() {
   runApp(const MyApp());
@@ -49,6 +50,17 @@ class _MyAppState extends State<MyApp> {
   void _updateConnectionStatus(ConnectivityResult result) {
     setState(() {
       _isOnline = result != ConnectivityResult.none;
+      if (!_isOnline) {
+        Fluttertoast.showToast(
+            msg: "Kindly check your internet connection!",
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Colors.red,
+            textColor: Colors.white,
+            fontSize: 16.0
+        );
+      }
     });
   }
 
@@ -78,7 +90,7 @@ class _SplashScreenState extends State<SplashScreen> {
     super.initState();
     Timer(
       const Duration(seconds: 3),
-          () => Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => const WebViewScreen(url: 'https://sawititech.co.ke'))), // Replace with your actual URL
+          () => Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => const WebViewScreen(url: 'https://your-url.com'))), // Replace with your actual URL
     );
   }
 
