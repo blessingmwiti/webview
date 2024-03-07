@@ -121,6 +121,24 @@ class WebViewScreenState extends State<WebViewScreen> {
   late WebViewController _controller;
   bool _isLoading = true;
 
+  Future<void> requestStoragePermission() async {
+    var status = await Permission.storage.status;
+    if (!status.isGranted) {
+      final result = await Permission.storage.request();
+      if (result.isGranted) {
+        // Permission granted
+        if (kDebugMode) {
+          print("Storage permission granted.");
+        }
+      } else {
+        // Permission denied
+        if (kDebugMode) {
+          print("Storage permission denied.");
+        }
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -166,12 +184,12 @@ class WebViewScreenState extends State<WebViewScreen> {
       ),
     );
   }
-  bool shouldInterceptRequest(String url) {
-    // Implement logic to determine if the URL is a download link
-    // This can be based on file extensions, or specific URL patterns, etc.
-    // This is a placeholder function
-    return false; // Placeholder return value
-  }
+  // bool shouldInterceptRequest(String url) {
+  //   // Implement logic to determine if the URL is a download link
+  //   // This can be based on file extensions, or specific URL patterns, etc.
+  //   // This is a placeholder function
+  //   return false; // Placeholder return value
+  // }
 }
 
 
