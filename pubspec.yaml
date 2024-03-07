@@ -30,9 +30,12 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  webview_flutter: ^3.0.0
-  connectivity_plus: ^2.0.2
-  fluttertoast: ^8.0.9
+  webview_flutter:
+  connectivity_plus:
+  fluttertoast:
+  http:
+  path_provider:
+  permission_handler:
 
 
   # The following adds the Cupertino Icons font to your application.

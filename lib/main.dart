@@ -4,6 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:http/http.dart' as http;
+import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 void main() {
   runApp(const MyApp());
@@ -90,7 +93,7 @@ class _SplashScreenState extends State<SplashScreen> {
     super.initState();
     Timer(
       const Duration(seconds: 3),
-          () => Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => const WebViewScreen(url: 'https://your-url.com'))), // Replace with your actual URL
+          () => Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => const WebViewScreen(url: 'https://sawititech.co.ke/sms'))), // Replace with your actual URL
     );
   }
 
@@ -162,6 +165,12 @@ class WebViewScreenState extends State<WebViewScreen> {
         ],
       ),
     );
+  }
+  bool shouldInterceptRequest(String url) {
+    // Implement logic to determine if the URL is a download link
+    // This can be based on file extensions, or specific URL patterns, etc.
+    // This is a placeholder function
+    return false; // Placeholder return value
   }
 }
 
