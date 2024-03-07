@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:flutter/services.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 void main() {
   runApp(const MyApp());
@@ -119,8 +119,6 @@ class WebViewScreenState extends State<WebViewScreen> {
   late WebViewController _controller;
   bool _isLoading = true;
 
-  static const platform = MethodChannel('com.blessingmwiti.app/downloads');
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -160,11 +158,33 @@ class WebViewScreenState extends State<WebViewScreen> {
                 SnackBar(content: Text('Error loading page: ${error.description}')),
               );
             },
+            navigationDelegate: (NavigationRequest request) {
+              if (_isDownloadLink(request.url)) {
+                _launchInBrowser(request.url);
+                return NavigationDecision.prevent;
+              }
+              return NavigationDecision.navigate;
+            },
           ),
           if (_isLoading) const Center(child: CircularProgressIndicator()),
         ],
       ),
     );
+  }
+  bool _isDownloadLink(String url) {
+    // Define logic to determine if the URL is a download link
+    return url.endsWith(".pdf") || url.endsWith(".zip"); // Example logic
+  }
+
+  Future<void> _launchInBrowser(String url) async {
+    final Uri uri = Uri.parse(url);
+    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+      // If the URL can't be launched, you might want to inform the user
+      // You could use a Toast, Snack bar, or a dialog to notify them
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Could not launch $url')),
+      );
+    }
   }
 }
 
