@@ -121,22 +121,67 @@ class WebViewScreenState extends State<WebViewScreen> {
   late WebViewController _controller;
   bool _isLoading = true;
 
+  Future<void> _downloadFile(String url) async {
+    // First, request storage permission
+    await requestStoragePermission();
+
+    // Check again if the permission was granted
+    var status = await Permission.storage.status;
+    if (status.isGranted) {
+      // Implement the download logic here
+      if (kDebugMode) {
+        print("Downloading file: $url");
+      }
+      // Actual file download implementation goes here
+    } else {
+      // Handle the case where permission is denied
+      _showPermissionDeniedDialog();
+      // Optionally, show a dialog or toast to the user explaining why the permission is needed
+    }
+  }
+
   Future<void> requestStoragePermission() async {
     var status = await Permission.storage.status;
     if (!status.isGranted) {
       final result = await Permission.storage.request();
       if (result.isGranted) {
-        // Permission granted
         if (kDebugMode) {
           print("Storage permission granted.");
         }
       } else {
-        // Permission denied
         if (kDebugMode) {
           print("Storage permission denied.");
         }
+        // User denied the permission. Show a dialog or toast
+        _showPermissionDeniedDialog();
       }
     }
+  }
+
+  void _showPermissionDeniedDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("Permission Denied"),
+          content: const Text("Storage permission is needed to download files. You can enable it in your app settings."),
+          actions: <Widget>[
+            TextButton(
+              child: const Text("Open Settings"),
+              onPressed: () {
+                openAppSettings(); // Open app settings
+              },
+            ),
+            TextButton(
+              child: const Text("Cancel"),
+              onPressed: () {
+                Navigator.of(context).pop(); // Dismiss the dialog
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -178,20 +223,30 @@ class WebViewScreenState extends State<WebViewScreen> {
                 SnackBar(content: Text('Error loading page: ${error.description}')),
               );
             },
+            navigationDelegate: (NavigationRequest request) {
+              if (_isDownloadLink(request.url)) {
+                // Implement your download logic here
+                if (kDebugMode) {
+                  print("Download link detected: ${request.url}");
+                }
+                // Placeholder for your download function
+                _downloadFile(request.url);
+                return NavigationDecision.prevent; // Prevent the WebView from navigating to the download link
+              }
+              return NavigationDecision.navigate; // Allow other navigation
+            },
           ),
           if (_isLoading) const Center(child: CircularProgressIndicator()),
         ],
       ),
     );
   }
-  // bool shouldInterceptRequest(String url) {
-  //   // Implement logic to determine if the URL is a download link
-  //   // This can be based on file extensions, or specific URL patterns, etc.
-  //   // This is a placeholder function
-  //   return false; // Placeholder return value
-  // }
-}
 
+  bool _isDownloadLink(String url) {
+    // Example logic to detect a download link. Adjust according to your needs.
+    return url.endsWith(".pdf") || url.endsWith(".zip");
+  }
+}
 
 class NoConnectionScreen extends StatelessWidget {
   const NoConnectionScreen({super.key});
